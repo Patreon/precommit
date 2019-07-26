@@ -1,0 +1,18 @@
+*.pyc
+__pycache__
+
+#vi temp files
+*.swp
+*.swo
+
+#emacs temp files
+*~
+\#*\#
+
+venv/
+venv*/
+.DS_Store
+.idea/
+.coverage
+.cache/
+.mypy_cache/
