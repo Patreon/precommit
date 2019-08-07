@@ -69,17 +69,15 @@ def test_codeowner_inherited_from_nested_init(tmpdir, capsys):
     assert result == 0
 
 
-def test_codeowner_ok(tmpdir):
+def test_codeowner_not_first_line(tmpdir, capsys):
     file = tmpdir.join("file.py")
-    contents = b'__codeowner__ = "test-user"'
-    file.write_binary(contents)
+    file.write(f'"""\nsome random docstring\n"""\n{variable_name} = "nitro"\n')
 
     result = main(
         [f"--variable-name={variable_name}", file.strpath]
     )
 
     assert result == 0
-    assert file.read_binary() == contents
 
 
 def test_autofix(tmpdir, capsys, monkeypatch):
@@ -131,7 +129,7 @@ def test_autofix_no_team_set(tmpdir, capsys, monkeypatch):
     )
     out, _ = capsys.readouterr()
 
-    assert result == 1
+    assert result == 2
     assert (
         "Unable to fix attribution: missing `user.team`"
         in out

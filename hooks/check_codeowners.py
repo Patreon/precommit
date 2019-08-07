@@ -30,7 +30,20 @@ def execute(args):
     If any modules do not have a code owner attribution, returns non-zero exit code.
     """
     errors = []
-    pattern = re.compile(f"^{args.variable_name}" + r"[^\w\d]")
+    owner = None
+
+    if args.auto_fix:
+        try:
+            owner = cmd_output("git", "config", "user.team").strip()
+        except subprocess.CalledProcessError:
+            print(
+                "Unable to fix attribution: missing `user.team` in git config. "
+                "See teams listed here https://github.com/orgs/Patreon/teams. To set your team: \n"
+                "git config --global user.team @Patreon/<your-team>"
+            )
+            args.auto_fix = False
+
+    pattern = re.compile(f"^{args.variable_name}" + r"[^\w\d]", re.MULTILINE)
 
     for file in args.filenames:
         file_contents = file.read()
@@ -46,17 +59,6 @@ def execute(args):
 
             found_match = any([has_initializer_pattern(directory, pattern) for directory in parents])
             if not found_match and args.auto_fix:
-                try:
-                    owner = cmd_output("git", "config", "user.team").strip()
-                except subprocess.CalledProcessError:
-                    errors.append(
-                        "Unable to fix attribution: missing `user.team` in git config. "
-                        "See teams listed here https://github.com/orgs/Patreon/teams. To set your team: \n"
-                        "git config --global user.team @Patreon/<your-team>"
-                    )
-                    file.close()
-                    break
-
                 file.seek(0)
                 file.write(f'{args.variable_name} = "{owner}"\n\n')
                 file.write(file_contents)
@@ -64,9 +66,7 @@ def execute(args):
                 file.close()
 
             elif not found_match:
-                errors.append(
-                    f"missing {args.variable_name}: {file.name}"
-                )
+                errors.append(f"missing {args.variable_name}: {file.name}")
 
     for error in errors:
         print(error)
