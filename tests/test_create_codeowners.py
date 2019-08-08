@@ -7,7 +7,7 @@ from hooks.create_codeowners import main
 from hooks.util import FAIL
 from hooks.util import PASS
 
-regex_pattern = "--regex-pattern=__codeowner__\\s*=\\s*['\"]([\\S\\s]+)['\"]"
+regex_pattern = "--regex-pattern=__codeowner__\s*=\s*['\"]([\S\s]+)['\"]"
 
 
 def create_file(tmpdir, filename, contents=""):
@@ -53,15 +53,15 @@ def test_preserves_contents_above_delimiter(tmpdir):
 
     assert result == PASS
     assert (
-        """
+            """
         path/to/file @Aesop
         path/to/file @Frog
         path/to/file @Ox"""
-        in codeowners_file.read()
+            in codeowners_file.read()
     )
     assert (
-        "path/to/file @TownMouse"
-        not in codeowners_file.read()
+            "path/to/file @TownMouse"
+            not in codeowners_file.read()
     )
 
 
@@ -102,8 +102,8 @@ def test_includes_attributed_files(tmpdir, monkeypatch):
         CODEOWNERS_DELIMITER
     )
     assert (
-        generated_entries
-        == f"{source_file_with_attribution.strpath} @Patreon/bigbadwolf\n"
+            generated_entries
+            == f"{source_file_with_attribution.strpath} @Patreon/bigbadwolf\n"
     )
 
 
@@ -146,6 +146,6 @@ def test_attribution_for_initializer(tmpdir, monkeypatch):
         CODEOWNERS_DELIMITER
     )
     assert (
-        generated_entries
-        == f"{path.dirname(init.strpath)}/ @Patreon/team\n{source_file_with_attribution.strpath} @Patreon/bigbadwolf, @Patreon/littlered\n"
+            generated_entries
+            == f"{path.dirname(init.strpath)}/ @Patreon/team\n{source_file_with_attribution.strpath} @Patreon/bigbadwolf, @Patreon/littlered\n"
     )
