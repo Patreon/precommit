@@ -14,13 +14,14 @@ def has_initializer_pattern(
     directory: str, pattern: Pattern
 ) -> bool:
     """
-    Returns true if the directory initializer has any matches, false otherwise
+    Returns true if the directory initializer has any *non-empty* matches, false otherwise
     """
     module_init_path = os.path.join(directory, "__init__.py")
 
     if os.path.exists(module_init_path):
         with open(module_init_path) as module_initializer:
-            return bool(re.findall(pattern, module_initializer.read()))
+            match = re.search(pattern, module_initializer.read())
+            return bool(match.group(1).strip()) if match is not None else False
     else:
         return False
 
@@ -43,7 +44,7 @@ def execute(args):
             )
             args.auto_fix = False
 
-    pattern = re.compile(f"^{args.variable_name}" + r"[^\w\d]", re.MULTILINE)
+    pattern = re.compile(f"^{args.variable_name}" + r"[^\w\d]" + "=\\s*['\"]([\\S\\s]+)['\"]", re.MULTILINE)
 
     for file in args.filenames:
         file_contents = file.read()

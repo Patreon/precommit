@@ -43,15 +43,26 @@ def test_codeowner_inherited_from_init(tmpdir, capsys):
     file = tmpdir.join("file.py")
     file.write_binary(b"")
     module_init = tmpdir.join("__init__.py")
-    module_init.write_text(
-        f'{variable_name} = "test-user"', encoding="utf-8"
-    )
+    module_init.write(f'{variable_name} = "test-user"')
 
     result = main(
         [f"--variable-name={variable_name}", file.strpath]
     )
 
     assert result == 0
+
+
+def test_empty_codeowner_value(tmpdir, capsys):
+    file = tmpdir.join("file.py")
+    file.write_binary(b"")
+    module_init = tmpdir.join("__init__.py")
+    module_init.write('__codeowner__ = " "')
+
+    result = main(
+        [f"--variable-name={variable_name}", file.strpath]
+    )
+
+    assert result == 1
 
 
 def test_codeowner_inherited_from_nested_init(tmpdir, capsys):
