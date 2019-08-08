@@ -8,6 +8,9 @@ from typing import Pattern
 
 from hooks.util import cmd_output
 
+# An empty string can be used as a code owner to bypass check, could be modifiable as an argument
+SENTINEL_VALUE = ''
+
 
 @lru_cache()
 def has_initializer_pattern(
@@ -21,7 +24,8 @@ def has_initializer_pattern(
     if os.path.exists(module_init_path):
         with open(module_init_path) as module_initializer:
             match = re.search(pattern, module_initializer.read())
-            return bool(match.group(1).strip()) if match is not None else False
+            # Return false if attribution is sentinel value
+            return match.group(1).strip() != SENTINEL_VALUE if match else False
     else:
         return False
 
@@ -40,11 +44,17 @@ def execute(args):
             print(
                 "Unable to fix attribution: missing `user.team` in git config. "
                 "See teams listed here https://github.com/orgs/Patreon/teams. To set your team: \n"
-                "git config --global user.team @Patreon/<your-team>"
+                "git config --global user.team @Patreon/<your-team>\n"
             )
             args.auto_fix = False
 
-    pattern = re.compile(f"^{args.variable_name}" + r"[^\w\d]" + "=\\s*['\"]([\\S\\s]+)['\"]", re.MULTILINE)
+    pattern = re.compile(
+        f"^{args.variable_name}"
+        + r"[^\w\d]=\s*['\"]((?:[\S\s]+|"
+        + re.escape(SENTINEL_VALUE)  # Match either at least one character, or sentinel value
+        + r"))['\"]",
+        re.MULTILINE,
+    )
 
     for file in args.filenames:
         file_contents = file.read()

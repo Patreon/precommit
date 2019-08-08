@@ -2,11 +2,12 @@ import subprocess
 from unittest.mock import Mock
 
 from hooks.check_codeowners import main
+from hooks.check_codeowners import SENTINEL_VALUE
 
 variable_name = "__codeowner__"
 
 
-def test_empty_files_fails_check(tmpdir, capsys):
+def test_empty_file_fails_check(tmpdir, capsys):
     file = tmpdir.join("file.py")
     file.write_binary(b"")
 
@@ -52,11 +53,15 @@ def test_codeowner_inherited_from_init(tmpdir, capsys):
     assert result == 0
 
 
-def test_empty_codeowner_value(tmpdir, capsys):
+def test_codeowner_not_inherited_from_empty_init(
+    tmpdir, capsys
+):
     file = tmpdir.join("file.py")
     file.write_binary(b"")
     module_init = tmpdir.join("__init__.py")
-    module_init.write('__codeowner__ = " "')
+    module_init.write(
+        f'{variable_name} = " {SENTINEL_VALUE} "'
+    )
 
     result = main(
         [f"--variable-name={variable_name}", file.strpath]
@@ -65,13 +70,24 @@ def test_empty_codeowner_value(tmpdir, capsys):
     assert result == 1
 
 
+def test_sentinel_codeowner_value_no_error(tmpdir, capsys):
+    file = tmpdir.join("file.py")
+    file.write(f'__codeowner__ = "{SENTINEL_VALUE}"')
+
+    result = main(
+        [f"--variable-name={variable_name}", file.strpath]
+    )
+
+    assert result == 0
+
+
 def test_codeowner_inherited_from_nested_init(tmpdir, capsys):
-    file = tmpdir.mkdir("sub").mkdir("nested").join("file.py")
+    file = (
+        tmpdir.mkdir("sub").mkdir("nested").join("file.py")
+    )
     file.write_binary(b"")
     module_init = tmpdir.join("__init__.py")
-    module_init.write_text(
-        f'{variable_name} = "test-user"', encoding="utf-8"
-    )
+    module_init.write(f'{variable_name} = "test-user"')
 
     result = main(
         [f"--variable-name={variable_name}", file.strpath]
@@ -82,7 +98,22 @@ def test_codeowner_inherited_from_nested_init(tmpdir, capsys):
 
 def test_codeowner_not_first_line(tmpdir, capsys):
     file = tmpdir.join("file.py")
-    file.write(f'"""\nsome random docstring\n"""\n{variable_name} = "nitro"\n')
+    file.write(
+        f'"""\nsome random docstring\n"""\n{variable_name} = "nitro"\n'
+    )
+
+    result = main(
+        [f"--variable-name={variable_name}", file.strpath]
+    )
+
+    assert result == 0
+
+
+def test_codeowner_multiple_teams(tmpdir, capsys):
+    file = tmpdir.join("file.py")
+    file.write(
+        f'{variable_name} = "@Patreon/workers, @Patreon/supreme"\n'
+    )
 
     result = main(
         [f"--variable-name={variable_name}", file.strpath]

@@ -116,7 +116,7 @@ def test_attribution_for_initializer(tmpdir, monkeypatch):
     source_file_with_attribution = create_file(
         tmpdir,
         "a.py",
-        '__codeowner__ = "@Patreon/bigbadwolf"',
+        '__codeowner__ = "@Patreon/bigbadwolf, @Patreon/littlered"',
     )
     codeowners_file = create_file(
         tmpdir, "CODEOWNER", CODEOWNERS_DELIMITER
@@ -147,5 +147,5 @@ def test_attribution_for_initializer(tmpdir, monkeypatch):
     )
     assert (
         generated_entries
-        == f"{path.dirname(init.strpath)}/ @Patreon/team\n{source_file_with_attribution.strpath} @Patreon/bigbadwolf\n"
+        == f"{path.dirname(init.strpath)}/ @Patreon/team\n{source_file_with_attribution.strpath} @Patreon/bigbadwolf, @Patreon/littlered\n"
     )
