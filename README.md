@@ -28,7 +28,7 @@ providing this value in a YAML file so be aware of YAMLs behavior around double 
 
 Example configuration file:
 
- ```yaml
+```yaml
 -   repo: git://github.com/Patreon/precommit
     rev: v1.0.2
     hooks:
