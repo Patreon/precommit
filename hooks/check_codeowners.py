@@ -50,7 +50,7 @@ def execute(args):
 
     pattern = re.compile(
         f"^{args.variable_name}"
-        + r"[^\w\d]=\s*['\"]((?:[\S\s]+|"
+        + r"[^\w\d]=\s*['\"]((?:.+|"
         + re.escape(SENTINEL_VALUE)  # Match either at least one character, or sentinel value
         + r"))['\"]",
         re.MULTILINE,

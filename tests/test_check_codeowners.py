@@ -60,7 +60,7 @@ def test_codeowner_not_inherited_from_empty_init(
     file.write_binary(b"")
     module_init = tmpdir.join("__init__.py")
     module_init.write(
-        f'{variable_name} = " {SENTINEL_VALUE} "'
+        f'{variable_name} = "{SENTINEL_VALUE}"\n"""\nsome random docstring\n"""'
     )
 
     result = main(
