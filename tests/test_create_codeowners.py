@@ -1,3 +1,5 @@
+__codeowner__ = "@Patreon/be-core"
+
 from os import path
 
 from unittest.mock import Mock
@@ -7,7 +9,7 @@ from hooks.create_codeowners import main
 from hooks.util import FAIL
 from hooks.util import PASS
 
-regex_pattern = "--regex-pattern=__codeowner__\s*=\s*['\"]([\S\s]+)['\"]"
+regex_pattern = r"--regex-pattern=__codeowner__\s*=\s*['\"]([\S\s]+)['\"]"
 
 
 def create_file(tmpdir, filename, contents=""):
@@ -147,5 +149,5 @@ def test_attribution_for_initializer(tmpdir, monkeypatch):
     )
     assert (
             generated_entries
-            == f"{path.dirname(init.strpath)}/ @Patreon/team\n{source_file_with_attribution.strpath} @Patreon/bigbadwolf, @Patreon/littlered\n"
+            == f"{path.dirname(init.strpath)}/**/*.py @Patreon/team\n{source_file_with_attribution.strpath} @Patreon/bigbadwolf, @Patreon/littlered\n"
     )

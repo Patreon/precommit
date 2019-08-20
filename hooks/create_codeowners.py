@@ -1,3 +1,5 @@
+__codeowner__ = "@Patreon/be-core"
+
 import argparse
 import itertools
 import os
@@ -67,7 +69,7 @@ def execute(args):
             ):
                 # if initializer has declaration, assume owner wants ownership over whole package
                 file_path = file_path.replace(
-                    "__init__.py", ""
+                    "__init__.py", "**/*.py"
                 )
                 codeowners_file.write(
                     f"{file_path} {owners}\n"

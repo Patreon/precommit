@@ -1,3 +1,5 @@
+__codeowner__ = "@Patreon/be-core"
+
 import subprocess
 from unittest.mock import Mock
 

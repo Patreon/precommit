@@ -1,0 +1,34 @@
+version: 2.1
+
+jobs:
+        build:
+                docker:
+                        - image: circleci/python:3.7.4
+                steps:
+                        - checkout
+                                
+                        - restore_cache:
+                                keys:
+                                        - venv-{{ checksum "dev-requirements.txt" }}
+                                        - venv-
+                        - run:
+                                name: create or activate venv
+                                command: |
+                                        [[ -d venv ]] || python3 -m virtualenv venv && . venv/bin/activate
+                                        pip install -r dev-requirements.txt
+                        - save_cache:
+                                key: venv-{{ checksum "dev-requirements.txt" }}
+                                paths:
+                                        - venv
+
+                        - run: |
+                                . venv/bin/activate
+                                pytest tests --junit-xml=test-results.xml
+                        - store_test_results:
+                                path: test-results.xml
+
+workflows:
+        version: 2
+        primary:
+                jobs:
+                        - build

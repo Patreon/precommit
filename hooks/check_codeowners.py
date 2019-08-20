@@ -1,3 +1,5 @@
+__codeowner__ = "@Patreon/be-core"
+
 import argparse
 import os
 import re
@@ -59,25 +61,28 @@ def execute(args):
     for file in args.filenames:
         file_contents = file.read()
 
-        found_match = bool(re.findall(pattern, file_contents))
-        if not found_match:
-            # Check inheritance from parent packages' initializers
-            parents = []
-            filename = file.name
-            for _ in range(filename.count('/')):
-                filename, _ = os.path.split(filename)
-                parents.append(filename)
+        try:
+            found_match = bool(re.findall(pattern, file_contents))
+            if not found_match:
+                # Check inheritance from parent packages' initializers
+                parents = []
+                filename = file.name
+                for _ in range(filename.count('/')):
+                    filename, _ = os.path.split(filename)
+                    parents.append(filename)
 
-            found_match = any([has_initializer_pattern(directory, pattern) for directory in parents])
-            if not found_match and args.auto_fix:
-                file.seek(0)
-                file.write(f'{args.variable_name} = "{owner}"\n\n')
-                file.write(file_contents)
-                file.truncate()
-                file.close()
+                found_match = any([has_initializer_pattern(directory, pattern) for directory in parents])
+                if not found_match and args.auto_fix:
+                    file.seek(0)
+                    file.write(f'{args.variable_name} = "{owner}"\n\n')
+                    file.write(file_contents)
+                    file.truncate()
+                    file.close()
 
-            elif not found_match:
-                errors.append(f"missing {args.variable_name}: {file.name}")
+                elif not found_match:
+                    errors.append(f"missing {args.variable_name}: {file.name}")
+        finally:
+            file.close()
 
     for error in errors:
         print(error)
