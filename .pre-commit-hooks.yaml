@@ -2,11 +2,13 @@
     name: Check has code owner attribution
     description: "Check if a module has owner attribution"
     entry: check-codeowners
-    language: python3.7
+    language: python
+    language_version: python3.7
     types: [python]
 -   id: create-codeowners
     name: Create CODEOWNERS file
     description: "Generate CODEOWNERS file a from regex pattern"
     entry: create-codeowners
-    language: python3.7
+    language: python
+    language_version: python3.7
     types: [python]
