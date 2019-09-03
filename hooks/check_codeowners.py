@@ -6,9 +6,10 @@ import re
 import subprocess
 import sys
 from functools import lru_cache
+from identify.identify import tags_from_path
 from typing import Pattern
 
-from hooks.util import cmd_output
+from .util import cmd_output
 
 # An empty string can be used as a code owner to bypass check, could be modifiable as an argument
 SENTINEL_VALUE = ''
@@ -58,7 +59,18 @@ def execute(args):
         re.MULTILINE,
     )
 
-    for file in args.filenames:
+    files = args.filenames
+    if args.since_master:
+        try:
+            merge_base = cmd_output("git", "merge-base", "--fork-point", "origin/master").strip()
+            all_changes = cmd_output("git", "diff", "--name-only", merge_base).splitlines()
+            py_changes = filter(lambda file: "python" in tags_from_path(file), all_changes)
+            files = (open(file, mode="r+", encoding="utf-8") for file in py_changes)
+        except Exception as e:
+            print(e)
+            pass
+
+    for file in files:
         file_contents = file.read()
 
         try:
@@ -108,6 +120,11 @@ def main(argv=None):
     parser.add_argument(
         "--variable-name",
         help="Variable name that is assigned the codeowner",
+    )
+    parser.add_argument(
+        "--since-master",
+        action="store_true",
+        help="Ignore the files in this commit, run on all files since origin/master, default False",
     )
 
     return execute(parser.parse_args(argv))

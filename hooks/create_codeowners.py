@@ -11,9 +11,9 @@ from typing import Match
 from typing import Pattern
 from typing import Tuple
 
-from hooks.util import FAIL
-from hooks.util import PASS
-from hooks.util import cmd_output
+from .util import FAIL
+from .util import PASS
+from .util import cmd_output
 
 CODEOWNERS_DELIMITER = "# END\n"
 
