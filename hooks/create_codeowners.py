@@ -62,18 +62,22 @@ def execute(args):
 
     regex = re.compile(args.regex_pattern)
     with open(args.codeowners_path, "w+") as codeowners_file:
-        codeowners_file.write(manual_entries + CODEOWNERS_DELIMITER)
-        for file in get_all_files():
-            for file_path, owners in file_owner(
-                file, regex
-            ):
-                # if initializer has declaration, assume owner wants ownership over whole package
-                file_path = file_path.replace(
-                    "__init__.py", "**/*.py"
-                )
-                codeowners_file.write(
-                    f"{file_path} {owners}\n"
-                )
+        try:
+            codeowners_file.write(manual_entries + CODEOWNERS_DELIMITER)
+            for file in get_all_files():
+                for file_path, owners in file_owner(
+                    file, regex
+                ):
+                    # if initializer has declaration, assume owner wants ownership over whole package
+                    file_path = file_path.replace(
+                        "__init__.py", "**/*.py"
+                    )
+                    codeowners_file.write(
+                        f"{file_path} {owners}\n"
+                    )
+        except Exception as e:
+            print(e)
+            return FAIL
 
     return PASS
 
