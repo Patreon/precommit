@@ -36,12 +36,8 @@ def get_all_files() -> Iterable[str]:
     """
     Get a list of all files managed by git
     """
-    all_git_files = cmd_output(
-        "git", "ls-files"
-    ).splitlines()
-    return itertools.filterfalse(
-        os.path.isdir, all_git_files
-    )
+    all_git_files = cmd_output("git", "ls-files").splitlines()
+    return itertools.filterfalse(os.path.isdir, all_git_files)
 
 
 def execute(args):
@@ -51,9 +47,7 @@ def execute(args):
     # TODO create codeowners file if not exists?
     with open(args.codeowners_path) as codeowners_file:
         try:
-            manual_entries, _ = codeowners_file.read().split(
-                CODEOWNERS_DELIMITER
-            )
+            manual_entries, _ = codeowners_file.read().split(CODEOWNERS_DELIMITER)
         except ValueError:
             print(
                 f'{args.codeowners_path} missing delimiter "{CODEOWNERS_DELIMITER}", did you remove it?'
@@ -65,15 +59,16 @@ def execute(args):
         try:
             codeowners_file.write(manual_entries + CODEOWNERS_DELIMITER)
             for file in get_all_files():
-                for file_path, owners in file_owner(
-                    file, regex
-                ):
-                    # if initializer has declaration, assume owner wants ownership over whole package
-                    file_path = file_path.replace(
-                        "__init__.py", "**/*.py"
-                    )
+                for file_path, owners in file_owner(file, regex):
+                    if file_path.endswith("__init__.py"):
+                        # if initializer has declaration, assume owner wants ownership of whole package
+                        # TODO update this to allow the owner to explicitly set:  __codeowner__ = "subtree:@Org/team"
+                        file_path = file_path.replace("__init__.py", "**/*.py")
+
                     codeowners_file.write(
-                        f"{file_path} {owners}\n"
+                        "{path} {owner}\n".format(
+                            path=file_path.replace(" ", "\\ "), owner=owners
+                        )
                     )
         except Exception as e:
             print(e)
@@ -85,9 +80,7 @@ def execute(args):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--codeowners-path",
-        help="Path to the CODEOWNERS file.",
-        required=True,
+        "--codeowners-path", help="Path to the CODEOWNERS file.", required=True,
     )
     parser.add_argument(
         "--regex-pattern",
